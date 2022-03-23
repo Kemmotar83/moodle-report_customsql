@@ -643,7 +643,7 @@ function report_customsql_delete_old_temp_files($upto) {
             $file = $fs->get_file($fileinfo['contextid'], $fileinfo['component'], $fileinfo['filearea'],
                 $fileinfo['itemid'], $fileinfo['filepath'], $fileinfo['filename']);
 
-            // Delete it if it exists
+            // Delete it if it exists.
             if ($file) {
                 $file->delete();
             }
@@ -765,7 +765,7 @@ function report_customsql_get_message($report, $csvfilename) {
 
     $fs = get_file_storage();
 
-    // Issue using GetFile to fetch the file
+    // Issue using GetFile to fetch the file.
     $file = $fs->get_file(
         context_system::instance()->id,
         'report_customsql',
@@ -775,7 +775,7 @@ function report_customsql_get_message($report, $csvfilename) {
         basename($csvfilename)
     );
 
-    if($report->emailwhat === 'emailattachment'){
+    if ($report->emailwhat === 'emailattachment') {
         $message->attachment = $file;
     }
 
@@ -844,7 +844,7 @@ function report_customsql_send_email_notification($recipient, $message) {
     $eventdata->fullmessageformat = $message->fullmessageformat;
     $eventdata->fullmessagehtml   = $message->fullmessagehtml;
     $eventdata->smallmessage      = $message->smallmessage;
-    $eventdata->attachment        = $message->attachment;
+    $eventdata->attachment = $message->attachment ?? null;
 
     return message_send($eventdata);
 }
