@@ -110,7 +110,6 @@ function report_customsql_generate_csv($report, $timenow) {
     $csvfilenames = array();
     $csvtimestamp = null;
     $count = 0;
-    $file = null;
     foreach ($rs as $row) {
         if (!$csvtimestamp) {
             list($csvfilename, $csvtimestamp) = report_customsql_csv_filename($report, $timenow);
@@ -118,19 +117,6 @@ function report_customsql_generate_csv($report, $timenow) {
 
             if (!file_exists($csvfilename)) {
                 $handle = fopen($csvfilename, 'w');
-                $fs = get_file_storage();
-                $file = $fs->create_file_from_pathname(
-                    [
-                        'contextid' => context_system::instance()->id,
-                        'component' => 'report_customsql',
-                        'filearea' => 'admin_report_customsql',
-                        'itemid' => 0,
-                        'filepath' => dirname($csvfilename) . '/',
-                        'filename' => basename($csvfilename),
-                    ],
-                    $csvfilename
-                );
-
                 report_customsql_start_csv($handle, $row, $report);
             } else {
                 $handle = fopen($csvfilename, 'a');
@@ -140,7 +126,7 @@ function report_customsql_generate_csv($report, $timenow) {
         $data = get_object_vars($row);
         foreach ($data as $name => $value) {
             if (report_customsql_get_element_type($name) == 'date_time_selector' &&
-                    report_customsql_is_integer($value) && $value > 0) {
+                report_customsql_is_integer($value) && $value > 0) {
                 $data[$name] = userdate($value, '%F %T');
             }
         }
@@ -216,7 +202,7 @@ function report_customsql_temp_cvs_name($reportid, $timestamp) {
     $path = 'admin_report_customsql/temp/'.$reportid;
     make_upload_directory($path);
     return array($CFG->dataroot.'/'.$path.'/'.strftime('%Y%m%d-%H%M%S', $timestamp).'.csv',
-                 $timestamp);
+        $timestamp);
 }
 
 function report_customsql_scheduled_cvs_name($reportid, $timestart) {
@@ -224,7 +210,7 @@ function report_customsql_scheduled_cvs_name($reportid, $timestart) {
     $path = 'admin_report_customsql/'.$reportid;
     make_upload_directory($path);
     return array($CFG->dataroot.'/'.$path.'/'.strftime('%Y%m%d-%H%M%S', $timestart).'.csv',
-                 $timestart);
+        $timestart);
 }
 
 function report_customsql_accumulating_cvs_name($reportid) {
@@ -244,7 +230,7 @@ function report_customsql_get_archive_times($report) {
     foreach ($files as $file) {
         if (preg_match('|/(\d\d\d\d)(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d)\.csv$|', $file, $matches)) {
             $archivetimes[] = mktime($matches[4], $matches[5], $matches[6], $matches[2],
-                                     $matches[3], $matches[1]);
+                $matches[3], $matches[1]);
         }
     }
     rsort($archivetimes);
@@ -307,9 +293,9 @@ function report_customsql_runable_options($type = null) {
         return array('manual' => get_string('manual', 'report_customsql'));
     }
     return array('manual' => get_string('manual', 'report_customsql'),
-                 'daily' => get_string('automaticallydaily', 'report_customsql'),
-                 'weekly' => get_string('automaticallyweekly', 'report_customsql'),
-                 'monthly' => get_string('automaticallymonthly', 'report_customsql')
+        'daily' => get_string('automaticallydaily', 'report_customsql'),
+        'weekly' => get_string('automaticallyweekly', 'report_customsql'),
+        'monthly' => get_string('automaticallymonthly', 'report_customsql')
     );
 }
 
@@ -324,13 +310,14 @@ function report_customsql_daily_at_options() {
 
 function report_customsql_email_options() {
     return array('emailnumberofrows' => get_string('emailnumberofrows', 'report_customsql'),
-            'emailresults' => get_string('emailresults', 'report_customsql'),
+        'emailresults' => get_string('emailresults', 'report_customsql'),
+        'emailattachment' => get_string('emailattachment', 'report_customsql'),
     );
 }
 
 function report_customsql_bad_words_list() {
     return array('ALTER', 'CREATE', 'DELETE', 'DROP', 'GRANT', 'INSERT', 'INTO',
-                 'TRUNCATE', 'UPDATE');
+        'TRUNCATE', 'UPDATE');
 }
 
 function report_customsql_contains_bad_word($string) {
@@ -339,19 +326,19 @@ function report_customsql_contains_bad_word($string) {
 
 function report_customsql_log_delete($id) {
     $event = \report_customsql\event\query_deleted::create(
-            array('objectid' => $id, 'context' => context_system::instance()));
+        array('objectid' => $id, 'context' => context_system::instance()));
     $event->trigger();
 }
 
 function report_customsql_log_edit($id) {
     $event = \report_customsql\event\query_edited::create(
-            array('objectid' => $id, 'context' => context_system::instance()));
+        array('objectid' => $id, 'context' => context_system::instance()));
     $event->trigger();
 }
 
 function report_customsql_log_view($id) {
     $event = \report_customsql\event\query_viewed::create(
-            array('objectid' => $id, 'context' => context_system::instance()));
+        array('objectid' => $id, 'context' => context_system::instance()));
     $event->trigger();
 }
 
@@ -398,20 +385,20 @@ function report_customsql_print_reports_for($reports, $type) {
 
         echo html_writer::start_tag('p');
         echo html_writer::tag('a', format_string($report->displayname),
-                              array('href' => report_customsql_url('view.php?id='.$report->id))).
-             ' '.report_customsql_time_note($report, 'span');
+                array('href' => report_customsql_url('view.php?id='.$report->id))).
+            ' '.report_customsql_time_note($report, 'span');
         if ($canedit) {
             $imgedit = $OUTPUT->pix_icon('t/edit', get_string('edit'));
             $imgdelete = $OUTPUT->pix_icon('t/delete', get_string('delete'));
             echo ' '.html_writer::tag('span', get_string('availableto', 'report_customsql',
-                                      $capabilities[$report->capability]),
-                                      array('class' => 'admin_note')).' '.
-                 html_writer::tag('a', $imgedit,
-                         ['title' => get_string('editreportx', 'report_customsql', format_string($report->displayname)),
-                          'href' => report_customsql_url('edit.php?id='.$report->id)]) . ' ' .
-                 html_writer::tag('a', $imgdelete,
-                            array('title' => get_string('deletereportx', 'report_customsql', format_string($report->displayname)),
-                                  'href' => report_customsql_url('delete.php?id='.$report->id)));
+                    $capabilities[$report->capability]),
+                    array('class' => 'admin_note')).' '.
+                html_writer::tag('a', $imgedit,
+                    ['title' => get_string('editreportx', 'report_customsql', format_string($report->displayname)),
+                        'href' => report_customsql_url('edit.php?id='.$report->id)]) . ' ' .
+                html_writer::tag('a', $imgdelete,
+                    array('title' => get_string('deletereportx', 'report_customsql', format_string($report->displayname)),
+                        'href' => report_customsql_url('delete.php?id='.$report->id)));
         }
         echo html_writer::end_tag('p');
         echo "\n";
@@ -502,7 +489,7 @@ function report_customsql_pretify_column_names($row, $querysql) {
         // Databases tend to return the columns lower-cased.
         // Try to get the original case from the query.
         if (preg_match('~SELECT.*?\s(' . preg_quote($colname, '~') . ')\b~is',
-                $querysql, $matches)) {
+            $querysql, $matches)) {
             $colname = $matches[1];
         }
 
@@ -572,10 +559,10 @@ function report_customsql_get_daily_time_starts($timenow, $at) {
     $dateparts = getdate($timenow);
     return array(
         mktime((int)$hours, (int)$minutes, 0,
-                $dateparts['mon'], $dateparts['mday'], $dateparts['year']),
+            $dateparts['mon'], $dateparts['mday'], $dateparts['year']),
         mktime((int)$hours, (int)$minutes, 0,
-                $dateparts['mon'], $dateparts['mday'] - 1, $dateparts['year']),
-        );
+            $dateparts['mon'], $dateparts['mday'] - 1, $dateparts['year']),
+    );
 }
 
 function report_customsql_get_week_starts($timenow) {
@@ -590,9 +577,9 @@ function report_customsql_get_week_starts($timenow) {
 
     return array(
         mktime(0, 0, 0, $dateparts['mon'], $dateparts['mday'] - $daysafterweekstart,
-               $dateparts['year']),
+            $dateparts['year']),
         mktime(0, 0, 0, $dateparts['mon'], $dateparts['mday'] - $daysafterweekstart - 7,
-               $dateparts['year']),
+            $dateparts['year']),
     );
 }
 
@@ -630,23 +617,7 @@ function report_customsql_delete_old_temp_files($upto) {
     }
     foreach ($files as $file) {
         if (basename($file) < $comparison) {
-            $fs = get_file_storage();
-
-            $fileinfo = array(
-                'component' => 'report_customsql',
-                'filearea' => 'admin_report_customsql',
-                'itemid' => 0,
-                'contextid' => context_system::instance()->id,
-                'filepath' => dirname($file) . '/',
-                'filename' => basename($file));
-
-            $file = $fs->get_file($fileinfo['contextid'], $fileinfo['component'], $fileinfo['filearea'],
-                $fileinfo['itemid'], $fileinfo['filepath'], $fileinfo['filename']);
-
-            // Delete it if it exists.
-            if ($file) {
-                $file->delete();
-            }
+            unlink($file);
             $count += 1;
         }
     }
@@ -690,7 +661,7 @@ function report_customsql_validate_users($userids, $capability) {
 function report_customsql_get_message_no_data($report) {
     // Construct subject.
     $subject = get_string('emailsubjectnodata', 'report_customsql',
-            report_customsql_plain_text_report_name($report));
+        report_customsql_plain_text_report_name($report));
     $url = new moodle_url('/report/customsql/view.php', array('id' => $report->id));
     $link = get_string('emailink', 'report_customsql', html_writer::tag('a', $url, array('href' => $url)));
     $fullmessage = html_writer::tag('p', get_string('nodatareturned', 'report_customsql') . ' ' . $link);
@@ -724,13 +695,13 @@ function report_customsql_get_message($report, $csvfilename) {
     // Construct subject.
     if ($countrows == 0) {
         $subject = get_string('emailsubjectnodata', 'report_customsql',
-                report_customsql_plain_text_report_name($report));
+            report_customsql_plain_text_report_name($report));
     } else if ($countrows == 1) {
         $subject = get_string('emailsubject1row', 'report_customsql',
-                report_customsql_plain_text_report_name($report));
+            report_customsql_plain_text_report_name($report));
     } else {
         $subject = get_string('emailsubjectxrows', 'report_customsql',
-                ['name' => report_customsql_plain_text_report_name($report), 'rows' => $countrows]);
+            ['name' => report_customsql_plain_text_report_name($report), 'rows' => $countrows]);
     }
 
     // Construct message without the table.
@@ -762,23 +733,6 @@ function report_customsql_get_message($report, $csvfilename) {
     $message->fullmessageformat = FORMAT_HTML;
     $message->fullmessagehtml   = $fullmessagehtml;
     $message->smallmessage      = null;
-
-    $fs = get_file_storage();
-
-    // Issue using GetFile to fetch the file.
-    $file = $fs->get_file(
-        context_system::instance()->id,
-        'report_customsql',
-        'admin_report_customsql',
-        0,
-        dirname($csvfilename) . '/',
-        basename($csvfilename)
-    );
-
-    if ($report->emailwhat === 'emailattachment') {
-        $message->attachment = $file;
-    }
-
     return $message;
 }
 
@@ -800,7 +754,11 @@ function report_customsql_email_report($report, $csvfilename = null) {
     $userids = preg_split("/[\s,]+/", $report->emailto);
     foreach ($userids as $userid) {
         $recipient = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-        $messageid = report_customsql_send_email_notification($recipient, $message);
+        $attachment = false;
+        if ($report->emailwhat === 'emailattachment') {
+            $attachment = true;
+        }
+        $messageid = report_customsql_send_email_notification($recipient, $message, $attachment, $csvfilename);
         if (!$messageid) {
             mtrace(get_string('emailsentfailed', 'report_customsql', fullname($recipient)));
         }
@@ -829,7 +787,7 @@ function report_customsql_get_ready_to_run_daily_reports($timenow) {
  * @param object $message the message object.
  * @return mixed result of {@link message_send()}.
  */
-function report_customsql_send_email_notification($recipient, $message) {
+function report_customsql_send_email_notification($recipient, $message, $attachment, $csvfilename) {
 
     // Prepare the message.
     $eventdata = new \core\message\message();
@@ -844,8 +802,20 @@ function report_customsql_send_email_notification($recipient, $message) {
     $eventdata->fullmessageformat = $message->fullmessageformat;
     $eventdata->fullmessagehtml   = $message->fullmessagehtml;
     $eventdata->smallmessage      = $message->smallmessage;
-    $eventdata->attachment = $message->attachment ?? null;
-
+    if ($attachment) {
+        $usercontext = \context_user::instance($recipient->id);
+        $file = new \stdClass;
+        $file->contextid = $usercontext->id;
+        $file->component = 'user';
+        $file->filearea = 'private';
+        $file->itemid = 0;
+        $file->filepath = '/';
+        $file->filename = basename($csvfilename);
+        $fs = get_file_storage();
+        $file = $fs->create_file_from_pathname($file, $csvfilename);
+        $eventdata->attachname = basename($csvfilename);
+        $eventdata->attachment = $file;
+    }
     return message_send($eventdata);
 }
 
@@ -915,7 +885,7 @@ function report_customsql_copy_csv_to_customdir($report, $timenow, $csvfilename 
  */
 function report_customsql_plain_text_report_name($report): string {
     return format_string($report->displayname, true,
-            ['context' => context_system::instance()]);
+        ['context' => context_system::instance()]);
 }
 
 /**
